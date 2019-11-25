@@ -5,18 +5,23 @@ import numpy as np
 from scipy import signal
 import time
 import threading
-
+from ctypes import *
 class ADI:
 
-    """
-    Create an instance of the FMComms5
-    """
-    def __init__(self):
 
+    def __init__(self):
+        """
+        Create an instance of the FMComms5
+        """
         self.sdr = adi.FMComms5(uri='ip:analog.local')
 
         self.sdr.rx_enabled_channels = [0, 1, 2, 3]
 
+        self.phaseSyncFile = "./libad9361-iio/phaseSync.so"
+
+        self.phasesync = CDLL(self.phaseSyncFile)
+
+        self.context = self.sdr._ctx._context
 
     def set_rf_frequency(self, frequency):
         """
@@ -214,3 +219,7 @@ class ADI:
         plt.draw()
 
         plt.show()
+
+    def phaseSync(self):
+        
+        self.phasesync.ad9361_fmcomms5_phase_sync(self.context, self.sdr.rx_lo)
