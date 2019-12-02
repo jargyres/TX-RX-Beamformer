@@ -23,6 +23,10 @@ class ADI:
 
         self.context = self.sdr._ctx._context
 
+        self.multichipSyncFile = "./libad9361-iio/multichipSync.so"
+
+        self.multichipsync = CDLL(self.multichipSyncFile)
+
     def set_rf_frequency(self, frequency):
         """
         Set the frequency that all of our rx will receive at
@@ -220,6 +224,73 @@ class ADI:
 
         plt.show()
 
+    def plotTimeDomain(self, data):
+        """
+        Plots the PSD of the received data\n
+        If the data is from multiple ports it will plot the separate data in different colors
+        """
+        # plt.specgram(data[0], NFFT=1024, Fs=self.sdr.sample_rate);
+        # plt.title("Spectogram of file");
+        # plt.xlabel("Time")
+        # plt.ylabel("Frequency")
+        # plt.show()
+        # plt.scatter(np.real(data[0]), np.imag(data[0]))
+        # f_carrier = []
+        # data_fft = []
+        if(len(data) == 1):
+            fig, ax = plt.subplots(2)
+            fig.suptitle("Signals in time domain")
+            ax[0].plot(np.linspace(0, 1, len(data[0])), np.real(data[0]))
+            ax[0].set_title("Real")
+            ax[1].plot(np.linspace(0, 1, len(data[0])), np.imag(data[0]))
+            ax[1].set_title("Imaginary")
+            plt.tight_layout()
+        if(len(data) == 2):
+            fig, ax = plt.subplots(2)
+            fig.suptitle("Signals in time domain")
+            ax[0].plot(np.linspace(0, 1, len(data[0])), np.real(data[0]))
+            ax[0].plot(np.linspace(0, 1, len(data[1])), np.real(data[1]))
+
+            ax[0].set_title("Real")
+            ax[1].plot(np.linspace(0, 1, len(data[0])), np.imag(data[0]))
+            ax[1].plot(np.linspace(0, 1, len(data[1])), np.imag(data[1]))
+
+            ax[1].set_title("Imaginary")
+        if(len(data) == 3):
+            fig, ax = plt.subplots(2)
+            fig.suptitle("Signals in time domain")
+            ax[0].plot(np.linspace(0, 1, len(data[0])), np.real(data[0]))
+            ax[0].plot(np.linspace(0, 1, len(data[1])), np.real(data[1]))
+            ax[0].plot(np.linspace(0, 1, len(data[2])), np.real(data[2]))
+
+            ax[0].set_title("Real")
+            ax[1].plot(np.linspace(0, 1, len(data[0])), np.imag(data[0]))
+            ax[1].plot(np.linspace(0, 1, len(data[1])), np.imag(data[1]))
+            ax[1].plot(np.linspace(0, 1, len(data[2])), np.imag(data[2]))
+
+            ax[1].set_title("Imaginary")
+        if(len(data) == 4):
+            fig, ax = plt.subplots(2)
+            fig.suptitle("Signals in time domain")
+            ax[0].plot(np.linspace(0, 1, len(data[0])), np.real(data[0]))
+            ax[0].plot(np.linspace(0, 1, len(data[1])), np.real(data[1]))
+            ax[0].plot(np.linspace(0, 1, len(data[2])), np.real(data[2]))
+            ax[0].plot(np.linspace(0, 1, len(data[3])), np.real(data[3]))
+
+            ax[0].set_title("Real")
+            ax[1].plot(np.linspace(0, 1, len(data[0])), np.imag(data[0]))
+            ax[1].plot(np.linspace(0, 1, len(data[1])), np.imag(data[1]))
+            ax[1].plot(np.linspace(0, 1, len(data[2])), np.imag(data[2]))
+            ax[1].plot(np.linspace(0, 1, len(data[3])), np.imag(data[3]))
+
+            ax[1].set_title("Imaginary")
+
+        plt.tight_layout()
+        fig.set_size_inches(9, 7, forward=True)
+        plt.show()
     def phaseSync(self):
         
         self.phasesync.ad9361_fmcomms5_phase_sync(self.context, self.sdr.rx_lo)
+
+    def MultiChipSync(self, flags):
+        self.multichipsync.ad9361_fmcomms5_multichip_sync(self.context, flags)
